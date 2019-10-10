@@ -1,17 +1,36 @@
 // @flow
 import React from 'react'
-import {
-    Card,
-    CardContent,
-    TextField,
-    Typography,
-    Button,
-} from '@material-ui/core'
+import { Box, Card, CardContent, Typography } from '@material-ui/core'
 import { SPACING_PADDING } from '../consts'
-import Box from '@material-ui/core/Box'
 import Layout from '../components/Layout'
-import Head from 'next/head'
 import Router from 'next/router'
+import Head from 'next/head'
+import { Formik } from 'formik'
+import FormRegister, {
+    validationSchemaRegisterForm,
+    valuesRegisterForm,
+} from '../components/Form/FormRegister'
+import { VAULT_API_TOKEN } from '../consts/vault'
+
+const axios = require('axios').default
+
+const submitValues = ({ userName, email, confirmPassword, password }) => {
+    console.log({ userName, email, confirmPassword, password })
+    axios({
+        method: 'post',
+        headers: {
+            Authorization: 'Bearer ' + VAULT_API_TOKEN,
+        },
+        url: 'https://35.201.20.30:8200/v1/auth/userpass/users/' + userName,
+        data: {
+            password: password,
+        },
+    })
+        .then(() => Router.push('/'))
+        .catch(err => {
+            console.log(err)
+        })
+}
 
 const Register = () => {
     return (
@@ -24,7 +43,7 @@ const Register = () => {
                     key="register"
                 />
             </Head>
-            <Card raised style={{ height: 650, width: 650 }}>
+            <Card raised style={{ height: 800, width: 650 }}>
                 <CardContent
                     style={{
                         height: '100%',
@@ -61,44 +80,12 @@ const Register = () => {
                                 }}
                             />
                         </Box>
-                        <TextField
-                            id="outlined-email-input"
-                            label="Enter an email"
-                            style={{ marginTop: SPACING_PADDING * 8 }}
-                            type="email"
-                            name="email"
-                            autoComplete="email"
-                            margin="normal"
-                            variant="outlined"
+                        <Formik
+                            render={props => <FormRegister {...props} />}
+                            initialValues={valuesRegisterForm}
+                            validationSchema={validationSchemaRegisterForm}
+                            onSubmit={submitValues}
                         />
-                        <TextField
-                            id="outlined-password-input"
-                            label="Enter a password"
-                            type="password"
-                            autoComplete="current-password"
-                            margin="normal"
-                            variant="outlined"
-                        />
-                        <TextField
-                            id="outlined-password-input"
-                            label="Re-enter the password"
-                            type="password"
-                            autoComplete="current-password"
-                            margin="normal"
-                            variant="outlined"
-                        />
-                        <Button
-                            variant="contained"
-                            style={{
-                                marginTop: SPACING_PADDING * 5,
-                            }}
-                            onClick={() => {
-                                Router.push('/')
-                            }}
-                            color="primary"
-                        >
-                            Register
-                        </Button>
                     </Box>
                 </CardContent>
             </Card>

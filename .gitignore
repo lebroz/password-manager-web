@@ -145,3 +145,5 @@ modules.xml
 .idea/sonarlint
 
 # End of https://www.gitignore.io/api/git,react,linux,webstorm+all,visualstudiocode
+
+.next/
