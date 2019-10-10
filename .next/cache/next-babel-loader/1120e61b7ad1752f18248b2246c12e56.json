@@ -1,1 +1,0 @@
-{"ast":null,"code":"export var SPACING_PADDING = 8;","map":{"version":3,"sources":["/home/romain/Projects/password-manager-web/src/consts/index.js"],"names":["SPACING_PADDING"],"mappings":"AAAA,OAAO,IAAMA,eAAe,GAAG,CAAxB","sourcesContent":["export const SPACING_PADDING = 8"]},"metadata":{},"sourceType":"module"}
