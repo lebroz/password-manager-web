@@ -4,15 +4,12 @@ import { Box, Button, TextField } from '@material-ui/core'
 import * as yup from 'yup'
 import { SPACING_PADDING } from '../../consts'
 
-export const valuesRegisterForm = {
-    userName: '',
+export const valuesLoginForm = {
     email: '',
-    confirmPassword: '',
     password: '',
 }
 
-export const validationSchemaRegisterForm = yup.object().shape({
-    userName: yup.string('Enter an username').required('Username is required'),
+export const validationSchemaLoginForm = yup.object().shape({
     email: yup
         .string('Enter an email')
         .email('Enter a valid email')
@@ -21,16 +18,11 @@ export const validationSchemaRegisterForm = yup.object().shape({
         .string('')
         .min(6, 'Password must contain at least 6 characters')
         .required('Enter your password'),
-    confirmPassword: yup
-        .string('Enter your password')
-        .min(6, 'Password must contain at least 6 characters')
-        .oneOf([yup.ref('password')], 'Password does not match')
-        .required('Confirm your password'),
 })
 
-const FormRegister = props => {
+const FormLogin = props => {
     const {
-        values: { userName, email, password, confirmPassword },
+        values: { email, password },
         errors,
         touched,
         handleChange,
@@ -53,20 +45,9 @@ const FormRegister = props => {
                 }}
             >
                 <TextField
-                    id="userName"
-                    label="Username"
-                    style={{ marginTop: SPACING_PADDING * 8 }}
-                    helperText={touched.userName ? errors.userName : ''}
-                    error={touched.userName && Boolean(errors.userName)}
-                    name="userName"
-                    margin="normal"
-                    variant="outlined"
-                    value={userName}
-                    onChange={change.bind(null, 'userName')}
-                />
-                <TextField
                     id="email"
                     label="Email"
+                    style={{ marginTop: SPACING_PADDING * 8 }}
                     helperText={touched.email ? errors.email : ''}
                     error={touched.email && Boolean(errors.email)}
                     type="email"
@@ -90,23 +71,6 @@ const FormRegister = props => {
                     value={password}
                     onChange={change.bind(null, 'password')}
                 />
-                <TextField
-                    id="confirmPassword"
-                    label="Confirm Password"
-                    helperText={
-                        touched.confirmPassword ? errors.confirmPassword : ''
-                    }
-                    error={
-                        touched.confirmPassword &&
-                        Boolean(errors.confirmPassword)
-                    }
-                    name="confirmPassword"
-                    type="password"
-                    margin="normal"
-                    variant="outlined"
-                    value={confirmPassword}
-                    onChange={change.bind(null, 'confirmPassword')}
-                />
                 <Button
                     type="submit"
                     variant="contained"
@@ -116,11 +80,11 @@ const FormRegister = props => {
                     color="primary"
                     disabled={!isValid}
                 >
-                    Register
+                    Login
                 </Button>
             </Box>
         </form>
     )
 }
 
-export default FormRegister
+export default FormLogin

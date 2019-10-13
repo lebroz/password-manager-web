@@ -1,13 +1,46 @@
 // @flow
-import React from 'react'
-import { Card, CardContent, TextField, Button, Link } from '@material-ui/core'
+import React, { useContext, useState } from 'react'
+import { Card, CardContent, Link, Snackbar } from '@material-ui/core'
 import Box from '@material-ui/core/Box'
 import { SPACING_PADDING } from '../consts'
 import Router from 'next/router'
 import Layout from '../components/Layout'
 import Head from 'next/dist/next-server/lib/head'
+import { authUser, getUserData, setUserData } from '../api/db'
+import { Formik } from 'formik'
+import FormLogin, {
+    validationSchemaLoginForm,
+    valuesLoginForm,
+} from '../components/Form/FormLogin'
+import { makeStyles } from '@material-ui/styles'
+import { red, green } from '@material-ui/core/colors'
+import UserContext from '../store/UserContext'
+import clsx from 'clsx'
+import * as R from 'ramda'
+import * as V from 'voca'
+
+export const SNACKBAR_DURATION = 10000
+
+const useStyles = makeStyles(() => ({
+    root: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    success: {
+        backgroundColor: green[500],
+    },
+    failure: {
+        backgroundColor: red[500],
+    },
+}))
 
 const Login = () => {
+    const classes = useStyles()
+    const context = useContext(UserContext)
+    const [msg, setMsg] = useState({ content: '', err: true })
+    const [isOpen, setIsOpen] = useState(false)
+
     return (
         <Layout>
             <Head>
@@ -36,36 +69,112 @@ const Login = () => {
                                 width={320}
                             />
                         </Box>
-                        <TextField
-                            id="outlined-email-input"
-                            label="Email"
-                            style={{ marginTop: SPACING_PADDING * 8 }}
-                            type="email"
-                            name="email"
-                            autoComplete="email"
-                            margin="normal"
-                            variant="outlined"
-                        />
-                        <TextField
-                            id="outlined-password-input"
-                            label="Password"
-                            type="password"
-                            autoComplete="current-password"
-                            margin="normal"
-                            variant="outlined"
-                        />
-                        <Button
-                            variant="contained"
-                            style={{
-                                marginTop: SPACING_PADDING * 5,
+                        <Formik
+                            render={props => <FormLogin {...props} />}
+                            initialValues={valuesLoginForm}
+                            validationSchema={validationSchemaLoginForm}
+                            onSubmit={({ email, password }) => {
+                                // AUTH USER HERE
+                                authUser(email, password)
+                                    .then(async res => {
+                                        // GET USER DATA HERE
+                                        await getUserData(
+                                            res.data.token,
+                                            res.data.userId
+                                        )
+                                            .then(res => {
+                                                context.setUserData(
+                                                    R.merge(context.userData, {
+                                                        _id: res.data._id,
+                                                        userName:
+                                                            res.data.userName,
+                                                        email: res.data.email,
+                                                        password:
+                                                            res.data.password,
+                                                    })
+                                                )
+                                            })
+                                            .catch(error => {
+                                                if (
+                                                    V.isEmpty(
+                                                        error.response.data
+                                                            .message
+                                                    ) === false
+                                                ) {
+                                                    setMsg({
+                                                        content:
+                                                            error.response.data
+                                                                .message,
+                                                        err: true,
+                                                    })
+                                                    setIsOpen(true)
+                                                } else {
+                                                    throw error
+                                                }
+                                            })
+                                        context.setToken(res.data.token)
+                                        // SET USER DATA HERE
+                                        await setUserData(
+                                            res.data.token,
+                                            res.data.userId,
+                                            context.userData
+                                        )
+                                            .then(() => {
+                                                setMsg({
+                                                    content:
+                                                        'Authentication succeed',
+                                                    err: false,
+                                                })
+                                                setIsOpen(true)
+                                                Router.push('/home')
+                                            })
+                                            .catch(error => {
+                                                if (
+                                                    V.isEmpty(
+                                                        error.response.data
+                                                            .message
+                                                    ) === false
+                                                ) {
+                                                    setMsg({
+                                                        content:
+                                                            error.response.data
+                                                                .message,
+                                                        err: true,
+                                                    })
+                                                    setIsOpen(true)
+                                                } else {
+                                                    setMsg({
+                                                        content:
+                                                            'An error occured!',
+                                                        err: true,
+                                                    })
+                                                    setIsOpen(true)
+                                                }
+                                            })
+                                    })
+                                    .catch(error => {
+                                        if (
+                                            V.isEmpty(
+                                                error.response.data.message
+                                            ) === false
+                                        ) {
+                                            setMsg({
+                                                content:
+                                                    error.response.data.message,
+                                                err: true,
+                                            })
+                                            setIsOpen(true)
+                                        } else {
+                                            setMsg({
+                                                content: 'An error occured!',
+                                                err: true,
+                                            })
+                                            setIsOpen(true)
+                                        }
+                                    })
+                                //END AUTH USER
                             }}
-                            color="primary"
-                            onClick={() => {
-                                Router.push('/home')
-                            }}
-                        >
-                            Login
-                        </Button>
+                        />
                         <Link
                             component="button"
                             variant="body2"
@@ -79,6 +188,25 @@ const Login = () => {
                     </Box>
                 </CardContent>
             </Card>
+            <Snackbar
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'center',
+                }}
+                open={isOpen}
+                autoHideDuration={SNACKBAR_DURATION}
+                onClose={() => {
+                    setIsOpen(false)
+                }}
+                ContentProps={{
+                    classes: {
+                        root: msg.err
+                            ? clsx(classes.root, classes.failure)
+                            : clsx(classes.root, classes.success),
+                    },
+                }}
+                message={<span id="message">{msg.content}</span>}
+            />
         </Layout>
     )
 }

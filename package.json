@@ -10,6 +10,8 @@
     "flow": "flow",
     "build": "next build",
     "start": "next start",
+    "build-start-app": "yarn build && yarn start",
+    "run-docker": "cd api/ ; yarn && yarn generate-keys && yarn generate-env ; cd ../ ; docker-compose build && docker-compose up",
     "prettier": "prettier --write \"src/**/*.js\""
   },
   "dependencies": {
@@ -18,11 +20,14 @@
     "@material-ui/styles": "^4.5.0",
     "@zeit/next-css": "^1.0.1",
     "axios": "^0.19.0",
+    "clsx": "^1.0.4",
     "formik": "^1.5.8",
     "next": "^9.1.1",
     "next-images": "^1.2.0",
+    "ramda": "^0.26.1",
     "react": "^16.10.2",
     "react-dom": "^16.10.2",
+    "voca": "^1.4.0",
     "yup": "^0.27.0"
   },
   "devDependencies": {

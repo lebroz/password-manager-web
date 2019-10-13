@@ -1,0 +1,30 @@
+version: '3.7'
+services:
+  web:
+    container_name: web
+    build: .
+    environment:
+      - VAULT_API="1FLQmcA1xIqf2gcnN53RX2Na"
+    ports:
+      - "3000:3000"
+  api:
+    container_name: api
+    restart: always
+    build: ./api
+    env_file: ./api/.env
+    environment:
+      - MONGO_URI="mongodb://mongo:27018"
+    ports:
+      - "${PORT}:${PORT}"
+    links:
+      - mongo
+    depends_on:
+      - mongo
+  mongo:
+    container_name: mongo
+    image: mongo:latest
+    command: mongod --port 27018
+    volumes:
+      - ./data:/data/db
+    ports:
+      - "27018:27018"

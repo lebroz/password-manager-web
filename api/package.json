@@ -1,0 +1,40 @@
+{
+  "name": "api-basic",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:lebroz/api-basic.git",
+  "author": "Romain Lancia <romainlancia@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "yarn generate-keys && yarn generate-env && node -r dotenv/config index.js",
+    "dev": "yarn generate-keys && yarn generate-env && ./node_modules/nodemon/bin/nodemon.js -r dotenv/config index.js",
+    "run-docker": "yarn generate-env && docker-compose build && docker-compose up",
+    "start-app-docker": "yarn generate-keys && node -r dotenv/config index.js",
+    "generate-keys": "node ./scripts/generate-keys.js",
+    "generate-env": "node ./scripts/generate-env.js",
+    "clean-env-keys": "rm -f .env; rm -f private.pem; rm -f public.pem",
+    "prettier": "prettier --write \"./**/*.js\"",
+    "lint": "eslint *.js"
+  },
+  "dependencies": {
+    "bcrypt": "^3.0.6",
+    "cookie-parser": "^1.4.4",
+    "dotenv": "^8.1.0",
+    "express": "^4.17.1",
+    "inert": "^5.1.3",
+    "joi": "^14.3.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.6.11",
+    "node-rsa": "^1.0.5",
+    "ramda": "^0.26.1",
+    "voca": "^1.4.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.6.0",
+    "@babel/node": "^7.6.1",
+    "eslint": "^6.3.0",
+    "eslint-config-google": "^0.14.0",
+    "nodemon": "^1.19.2",
+    "prettier": "1.18.2"
+  }
+}
