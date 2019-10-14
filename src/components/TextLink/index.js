@@ -11,7 +11,7 @@ const TextLink = ({
 }: {
     content: string,
     onClick: () => void,
-    style: Object,
+    style?: Object,
 }) => {
     return (
         <Link

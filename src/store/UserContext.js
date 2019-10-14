@@ -1,6 +1,7 @@
 // @flow
 import React, { createContext } from 'react'
 
+// $FlowFixMe
 const UserContext = createContext({
     userData: {
         _id: '',

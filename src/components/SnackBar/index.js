@@ -37,7 +37,7 @@ const SnackBar = ({
         setWHeight(window.innerHeight)
     })
 
-    return (
+    return wHeight != null ? (
         <Snackbar
             style={{
                 position: 'relative',
@@ -55,7 +55,7 @@ const SnackBar = ({
             }}
             message={<span id="message">{msg.content}</span>}
         />
-    )
+    ) : null
 }
 
 export default SnackBar

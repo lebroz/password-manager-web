@@ -25,6 +25,20 @@ export function createUserSecret(userName: string) {
     })
 }
 
+export function deleteUserSecret(id: string, token: string) {
+    return axios({
+        method: 'delete',
+        mode: 'no-cors',
+        httpsAgent: agent,
+        headers: {
+            Authorization: 'Bearer ' + token,
+            'Access-Control-Allow-Origin': '*',
+            'Content-Type': 'application/json',
+        },
+        url: BASE_URL + 'secret/' + id,
+    })
+}
+
 export function createUserPolicy(userName: string) {
     return axios({
         method: 'post',

@@ -7,6 +7,7 @@ import AddIcon from '@material-ui/icons/Add'
 const FloatButton = ({ onClick }: { onClick: () => void }) => {
     return (
         <Fab
+            disableRipple
             style={{
                 position: 'absolute',
                 backgroundColor: BACKGROUND_COLOR,

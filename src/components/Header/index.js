@@ -14,12 +14,11 @@ import {
     Typography,
 } from '@material-ui/core'
 import { BACKGROUND_COLOR } from '../../pages/login'
-import AccountCircle from '@material-ui/icons/AccountCircle'
 import { SPACING_PADDING } from '../../consts'
 
 const useStyles = makeStyles(theme => ({
     title: {
-        marginLeft: SPACING_PADDING * 2,
+        marginLeft: SPACING_PADDING * 4,
         flexGrow: 1,
     },
 }))
@@ -44,12 +43,15 @@ const Header = ({ title }: { title: string }) => {
     }
 
     const handleLogOut = () => {
-        revokeUserToken(localStorage.getItem('vault-token')).then(() => {
-            localStorage.removeItem('uid')
-            localStorage.removeItem('token')
-            localStorage.removeItem('vault-token')
-            Router.push('/')
-        })
+        const vaultToken = localStorage.getItem('vault-token')
+        if (vaultToken != null) {
+            revokeUserToken(vaultToken).then(() => {
+                localStorage.removeItem('uid')
+                localStorage.removeItem('token')
+                localStorage.removeItem('vault-token')
+                Router.push('/')
+            })
+        }
     }
 
     return (
@@ -83,8 +85,21 @@ const Header = ({ title }: { title: string }) => {
                         >
                             Hello, {context.userData.userName}
                         </Typography>
-                        <IconButton onClick={handleMenu} color="inherit">
-                            <AccountCircle />
+                        <IconButton
+                            onClick={handleMenu}
+                            disableRipple
+                            style={{
+                                padding: 8,
+                                marginRight: SPACING_PADDING * 4,
+                                marginLeft: SPACING_PADDING * 2,
+                                textTransform: 'uppercase',
+                                backgroundColor: 'white',
+                                color: BACKGROUND_COLOR,
+                                width: 40,
+                                height: 40,
+                            }}
+                        >
+                            {context.userData.userName[0]}
                         </IconButton>
                         <Menu
                             id="menu-appbar"

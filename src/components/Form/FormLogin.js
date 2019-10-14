@@ -21,6 +21,7 @@ export const validationSchemaLoginForm = yup.object().shape({
         .required('Enter your password'),
 })
 
+// $FlowFixMe
 const FormLogin = props => {
     const {
         values: { email, password },
@@ -75,6 +76,7 @@ const FormLogin = props => {
                 <Button
                     type="submit"
                     variant="contained"
+                    disableRipple
                     style={{
                         color: 'white',
                         marginTop: SPACING_PADDING * 5,

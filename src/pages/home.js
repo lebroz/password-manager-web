@@ -1,5 +1,5 @@
 // @flow
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState, useCallback } from 'react'
 import Layout from '../components/Layout'
 import UserContext from '../store/UserContext'
 import {
@@ -21,7 +21,6 @@ import {
     Button,
     DialogActions,
     GridList,
-    CircularProgress,
 } from '@material-ui/core'
 import { SPACING_PADDING } from '../consts'
 import { makeStyles } from '@material-ui/core/styles'
@@ -32,6 +31,7 @@ import Head from 'next/head'
 import Header from '../components/Header'
 import FloatButton from '../components/FloatButton'
 import { BACKGROUND_COLOR } from './login'
+import * as R from 'ramda'
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -39,9 +39,6 @@ const useStyles = makeStyles(theme => ({
     },
     menuButton: {
         marginRight: theme.spacing(2),
-    },
-    progress: {
-        margin: theme.spacing(2),
     },
 }))
 
@@ -54,44 +51,74 @@ const Home = () => {
     const [isOpen, setIsOpen] = useState(false)
 
     useEffect(() => {
-        getUserData(localStorage.getItem('token'), localStorage.getItem('uid'))
-            .then(res => {
-                context.setUserData(res.data)
-            })
-            .then(() => {
-                if (localStorage.getItem('vault-token') == null) {
-                    createUserToken(
-                        context.userData.userName,
-                        context.userData._id
-                    )
-                        .then(res => {
-                            localStorage.setItem(
-                                'vault-token',
-                                res.data.auth.client_token
-                            )
-                        })
-                        .then(() => {
-                            getUserSecrets(
-                                context.userData.userName,
-                                localStorage.getItem('vault-token')
-                            ).then(res => {
-                                setSecrets(res.data.data)
+        const token = localStorage.getItem('token')
+        const uid = localStorage.getItem('uid')
+        if (token != null && uid != null) {
+            getUserData(token, uid)
+                .then(res => {
+                    context.setUserData(res.data)
+                })
+                .then(() => {
+                    if (localStorage.getItem('vault-token') == null) {
+                        createUserToken(context.userData.userName)
+                            .then(res => {
+                                localStorage.setItem(
+                                    'vault-token',
+                                    res.data.auth.client_token
+                                )
                             })
-                        })
-                        .catch(error => console.log(error))
-                } else {
-                    getUserSecrets(
-                        context.userData.userName,
-                        localStorage.getItem('vault-token')
-                    )
-                        .then(res => {
-                            setSecrets(res.data.data)
-                        })
-                        .catch(error => console.log(error))
-                }
-            })
-            .catch(error => console.log(error))
+                            .then(() => {
+                                const vaultToken = localStorage.getItem(
+                                    'vault-token'
+                                )
+                                if (vaultToken != null) {
+                                    getUserSecrets(
+                                        context.userData.userName,
+                                        vaultToken
+                                    ).then(res => {
+                                        setSecrets(res.data.data)
+                                    })
+                                }
+                            })
+                            .catch(error => console.log(error))
+                    } else {
+                        const vaultToken = localStorage.getItem('vault-token')
+                        if (vaultToken != null) {
+                            getUserSecrets(context.userData.userName, token)
+                                .then(res => {
+                                    setSecrets(res.data.data)
+                                })
+                                .catch(error => console.log(error))
+                        }
+                    }
+                })
+                .catch(error => console.log(error))
+        }
     }, [context])
+
+    const handleDelete = useCallback(event => {
+        const vaultToken = localStorage.getItem('vault-token')
+        const newState = R.omit([event.currentTarget.id], secrets)
+        if (vaultToken != null) {
+            updateUserSecrets(context.userData.userName, vaultToken, newState)
+                .then(() => {
+                    setSecrets(newState)
+                })
+                .catch(error => console.log(error))
+        }
+    })
+
+    // const handleEdit = useCallback(event => {
+    //     const newState = R.omit([event.currentTarget.id], secrets)
+    //     updateUserSecrets(
+    //       context.userData.userName,
+    //       localStorage.getItem('vault-token'),
+    //     )
+    //       .then(() => {
+    //           setSecrets(newState)
+    //       })
+    //       .catch(error => console.log(error))
+    // })
 
     return (
         <Layout>
@@ -112,10 +139,11 @@ const Home = () => {
                 {secrets != null ? (
                     <>
                         <GridList
-                            cols={4}
+                            cols={6}
                             style={{
+                                width: '100%',
                                 marginTop: SPACING_PADDING * 10,
-                                marginLeft: SPACING_PADDING * 3,
+                                padding: SPACING_PADDING * 2,
                             }}
                         >
                             {Object.keys(secrets).map(key => (
@@ -201,6 +229,7 @@ const Home = () => {
                                                     }}
                                                 >
                                                     <Delete
+                                                        id={key}
                                                         style={{
                                                             cursor: 'pointer',
                                                             color: BACKGROUND_COLOR,
@@ -208,9 +237,7 @@ const Home = () => {
                                                                 SPACING_PADDING *
                                                                 5,
                                                         }}
-                                                        onClick={() => {
-                                                            console.log('oui')
-                                                        }}
+                                                        onClick={handleDelete}
                                                     />
                                                     <Edit
                                                         style={{
@@ -236,7 +263,19 @@ const Home = () => {
                     </>
                 ) : (
                     <Layout>
-                        <CircularProgress className={classes.progress} />
+                        <Typography
+                            style={{
+                                marginTop: SPACING_PADDING,
+                                fontFamily: 'Nunito',
+                                textTransform: 'uppercase',
+                                letterSpacing: -0.25,
+                                fontWeight: 600,
+                                color: BACKGROUND_COLOR,
+                            }}
+                        >
+                            You don't have secrets for now, click on the add
+                            button bellow to start.
+                        </Typography>
                     </Layout>
                 )}
             </>
@@ -256,6 +295,7 @@ const Home = () => {
                         id="name-secret"
                         label="Name secret"
                         fullWidth
+                        autoComplete="off"
                         onChange={e => {
                             setNewTitleSecret(e.target.value)
                         }}
@@ -265,6 +305,7 @@ const Home = () => {
                         id="value-secret"
                         label="Value secret"
                         fullWidth
+                        autoComplete="off"
                         onChange={e => {
                             setNewSecret(e.target.value)
                         }}
@@ -272,6 +313,7 @@ const Home = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button
+                        disableRipple
                         onClick={() => {
                             setIsOpen(false)
                             setNewSecret(null)
@@ -282,21 +324,27 @@ const Home = () => {
                         Cancel
                     </Button>
                     <Button
+                        disableRipple
                         onClick={() => {
                             setIsOpen(false)
-                            updateUserSecrets(
-                                context.userData.userName,
-                                localStorage.getItem('vault-token'),
-                                { ...secrets, [newTitleSecret]: newSecret }
-                            ).then(res => {
-                                console.log(res)
-                                setSecrets({
-                                    ...secrets,
-                                    [newTitleSecret]: newSecret,
+                            const vaultToken = localStorage.getItem(
+                                'vault-token'
+                            )
+                            if (newTitleSecret != null && vaultToken != null) {
+                                updateUserSecrets(
+                                    context.userData.userName,
+                                    vaultToken,
+                                    { ...secrets, [newTitleSecret]: newSecret }
+                                ).then(res => {
+                                    console.log(res)
+                                    setSecrets({
+                                        ...secrets,
+                                        [newTitleSecret]: newSecret,
+                                    })
+                                    setNewSecret(null)
+                                    setNewTitleSecret(null)
                                 })
-                                setNewSecret(null)
-                                setNewTitleSecret(null)
-                            })
+                            }
                         }}
                         color="primary"
                     >
