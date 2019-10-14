@@ -15,7 +15,6 @@ router.post(
     '/',
     (req, res, next) => {
         User.find({ email: req.body.email }, (err, docs) => {
-            req.userId = docs[0]._id
             if (err) {
                 res.status(500).send({
                     success: msg.SUCCESS_FALSE,
@@ -29,6 +28,7 @@ router.post(
                     message: msg.ERR_WRONG_CREDENTIALS,
                 })
             } else {
+                req.userId = docs[0]._id
                 bcrypt.compare(
                     req.body.password,
                     docs[0].password,

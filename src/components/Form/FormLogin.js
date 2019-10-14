@@ -1,5 +1,5 @@
 // @flow
-import React from 'react'
+import React, { useCallback } from 'react'
 import * as yup from 'yup'
 import { Box, Button, TextField } from '@material-ui/core'
 import { SPACING_PADDING } from '../../consts'
@@ -36,8 +36,9 @@ const FormLogin = props => {
     const change = (name, e) => {
         e.persist()
         handleChange(e)
-        setFieldTouched(name, true, false)
+        setFieldTouched(name, true) //, false)
     }
+
     return (
         <form onSubmit={handleSubmit}>
             <Box

@@ -2,6 +2,7 @@ version: '3.7'
 services:
   web:
     container_name: web
+    restart: always
     build: .
     environment:
       - VAULT_API="1FLQmcA1xIqf2gcnN53RX2Na"
@@ -15,7 +16,7 @@ services:
     environment:
       - MONGO_URI="mongodb://mongo:27018"
     ports:
-      - "${PORT}:${PORT}"
+      - "60000:60000"
     links:
       - mongo
     depends_on:

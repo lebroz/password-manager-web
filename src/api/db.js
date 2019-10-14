@@ -9,12 +9,7 @@ const agent = new https.Agent({
     rejectUnauthorized: false,
 })
 
-export function createUser(
-    userName: string,
-    email: string,
-    password: string,
-    vaultToken: string
-) {
+export function createUser(userName: string, email: string, password: string) {
     return axios({
         method: 'post',
         mode: 'no-cors',
@@ -28,7 +23,6 @@ export function createUser(
             userName: userName,
             email: email,
             password: password,
-            vaultToken: vaultToken,
         },
     })
 }

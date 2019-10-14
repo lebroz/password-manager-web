@@ -19,6 +19,7 @@ import ShapeLoginRegister from '../components/Layout/shape'
 import TextLink from '../components/TextLink'
 import Layout from '../components/Layout'
 import Head from 'next/head'
+import { ERR_DEFAULT_MESSAGE, ERR_NETWORK_ERROR } from '../consts/strings'
 
 export const SNACKBAR_DURATION = 6000
 export const BACKGROUND_COLOR = '#ff3333'
@@ -35,7 +36,6 @@ const Login = () => {
     const handleError = useCallback(
         error => {
             {
-                console.log('err: ', error.response)
                 if (V.isEmpty(error.response) === false) {
                     if (V.isEmpty(error.response.data.message) === false) {
                         setMsg({
@@ -45,14 +45,14 @@ const Login = () => {
                         setIsOpen(true)
                     } else {
                         setMsg({
-                            content: 'An error occured!',
+                            content: ERR_DEFAULT_MESSAGE,
                             err: true,
                         })
                         setIsOpen(true)
                     }
                 } else {
                     setMsg({
-                        content: 'Network error',
+                        content: ERR_NETWORK_ERROR,
                         err: true,
                     })
                     setIsOpen(true)
@@ -123,9 +123,13 @@ const Login = () => {
                                 onSubmit={({ email, password }) => {
                                     // AUTH USER HERE
                                     authUser(email, password)
-                                        .then(async res => {
+                                        .then(res => {
                                             // GET USER DATA HERE
-                                            await getUserData(
+                                            localStorage.setItem(
+                                                'token',
+                                                res.data.token
+                                            )
+                                            getUserData(
                                                 res.data.token,
                                                 res.data.userId
                                             )
@@ -153,28 +157,32 @@ const Login = () => {
                                                             }
                                                         )
                                                     )
-                                                })
-                                                .catch(error =>
-                                                    handleError(error)
-                                                )
-                                            localStorage.setItem(
-                                                'token',
-                                                res.data.token
-                                            )
-                                            // SET USER DATA HERE
-                                            await setUserData(
-                                                res.data.token,
-                                                res.data.userId,
-                                                context.userData
-                                            )
-                                                .then(() => {
-                                                    setMsg({
-                                                        content:
-                                                            'Authentication succeed',
-                                                        err: false,
-                                                    })
-                                                    setIsOpen(true)
-                                                    Router.push('/home')
+                                                    const token = localStorage.getItem(
+                                                        'token'
+                                                    )
+                                                    if (token != null) {
+                                                        setUserData(
+                                                            token,
+                                                            res.data._id,
+                                                            context.userData
+                                                        )
+                                                            .then(() => {
+                                                                setMsg({
+                                                                    content:
+                                                                        'Authentication succeed',
+                                                                    err: false,
+                                                                })
+                                                                setIsOpen(true)
+                                                                Router.push(
+                                                                    '/home'
+                                                                )
+                                                            })
+                                                            .catch(error =>
+                                                                handleError(
+                                                                    error
+                                                                )
+                                                            )
+                                                    }
                                                 })
                                                 .catch(error =>
                                                     handleError(error)

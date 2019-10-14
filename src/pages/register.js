@@ -16,6 +16,7 @@ import ShapeLoginRegister from '../components/Layout/shape'
 import SnackBar from '../components/SnackBar'
 import Layout from '../components/Layout'
 import Head from 'next/head'
+import { ERR_DEFAULT_MESSAGE, ERR_NETWORK_ERROR } from '../consts/strings'
 
 const axios = require('axios').default
 
@@ -40,14 +41,14 @@ const Register = () => {
                         setIsOpen(true)
                     } else {
                         setMsg({
-                            content: 'An error occured!',
+                            content: ERR_DEFAULT_MESSAGE,
                             err: true,
                         })
                         setIsOpen(true)
                     }
                 } else {
                     setMsg({
-                        content: 'Network error',
+                        content: ERR_NETWORK_ERROR,
                         err: true,
                     })
                     setIsOpen(true)
@@ -133,7 +134,7 @@ const Register = () => {
                                     password,
                                 }) => {
                                     // CREATE USER HERE
-                                    createUser(userName, email, password, '')
+                                    createUser(userName, email, password)
                                         .then(() => {
                                             // SETUP VAULT SECRET, POLICY, LEASE USER HERE
                                             axios

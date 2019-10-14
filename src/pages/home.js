@@ -108,18 +108,6 @@ const Home = () => {
         }
     })
 
-    // const handleEdit = useCallback(event => {
-    //     const newState = R.omit([event.currentTarget.id], secrets)
-    //     updateUserSecrets(
-    //       context.userData.userName,
-    //       localStorage.getItem('vault-token'),
-    //     )
-    //       .then(() => {
-    //           setSecrets(newState)
-    //       })
-    //       .catch(error => console.log(error))
-    // })
-
     return (
         <Layout>
             <Head>
@@ -336,7 +324,6 @@ const Home = () => {
                                     vaultToken,
                                     { ...secrets, [newTitleSecret]: newSecret }
                                 ).then(res => {
-                                    console.log(res)
                                     setSecrets({
                                         ...secrets,
                                         [newTitleSecret]: newSecret,
