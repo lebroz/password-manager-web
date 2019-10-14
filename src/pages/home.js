@@ -84,7 +84,10 @@ const Home = () => {
                     } else {
                         const vaultToken = localStorage.getItem('vault-token')
                         if (vaultToken != null) {
-                            getUserSecrets(context.userData.userName, token)
+                            getUserSecrets(
+                                context.userData.userName,
+                                vaultToken
+                            )
                                 .then(res => {
                                     setSecrets(res.data.data)
                                 })
@@ -127,9 +130,11 @@ const Home = () => {
                 {secrets != null ? (
                     <>
                         <GridList
-                            cols={6}
+                            cellHeight={220}
+                            cols={5}
                             style={{
                                 width: '100%',
+                                alignContent: 'flex-start',
                                 marginTop: SPACING_PADDING * 10,
                                 padding: SPACING_PADDING * 2,
                             }}
@@ -138,7 +143,7 @@ const Home = () => {
                                 <Box
                                     key={key}
                                     style={{
-                                        padding: 16,
+                                        padding: SPACING_PADDING * 2,
                                     }}
                                 >
                                     <Card
@@ -243,30 +248,41 @@ const Home = () => {
                                 </Box>
                             ))}
                         </GridList>
-                        <FloatButton
-                            onClick={() => {
-                                setIsOpen(true)
-                            }}
-                        />
                     </>
                 ) : (
                     <Layout>
-                        <Typography
+                        <Box
                             style={{
-                                marginTop: SPACING_PADDING,
-                                fontFamily: 'Nunito',
-                                textTransform: 'uppercase',
-                                letterSpacing: -0.25,
-                                fontWeight: 600,
-                                color: BACKGROUND_COLOR,
+                                display: 'flex',
+                                width: '100%',
+                                alignItems: 'center',
+                                justifyContent: 'center',
                             }}
                         >
-                            You don't have secrets for now, click on the add
-                            button bellow to start.
-                        </Typography>
+                            <Typography
+                                style={{
+                                    marginTop: SPACING_PADDING,
+                                    fontFamily: 'Nunito',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: -0.25,
+                                    textAlign: 'center',
+                                    fontWeight: 400,
+                                    color: BACKGROUND_COLOR,
+                                }}
+                            >
+                                You don't have secrets for now
+                                <br />
+                                Add a secret to start
+                            </Typography>
+                        </Box>
                     </Layout>
                 )}
             </>
+            <FloatButton
+                onClick={() => {
+                    setIsOpen(true)
+                }}
+            />
             <Dialog
                 open={isOpen}
                 onClose={() => {
@@ -283,6 +299,7 @@ const Home = () => {
                         id="name-secret"
                         label="Name secret"
                         fullWidth
+                        autoFocus
                         autoComplete="off"
                         onChange={e => {
                             setNewTitleSecret(e.target.value)
