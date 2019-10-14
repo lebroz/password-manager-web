@@ -1,7 +1,7 @@
 // @flow
 import React from 'react'
 import { Fab } from '@material-ui/core'
-import { BACKGROUND_COLOR } from '../../pages/login'
+import { BACKGROUND_COLOR } from '../../consts'
 import AddIcon from '@material-ui/icons/Add'
 
 const FloatButton = ({ onClick }: { onClick: () => void }) => {

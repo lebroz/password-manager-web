@@ -1,7 +1,7 @@
 // @flow
 import React from 'react'
 import { Box } from '@material-ui/core'
-import { BACKGROUND_COLOR } from '../../pages/login'
+import { BACKGROUND_COLOR } from '../../consts'
 
 const ShapeLoginRegister = () => {
     return (

@@ -4,8 +4,7 @@ import { Snackbar } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import { green, red } from '@material-ui/core/colors'
 import clsx from 'clsx'
-import { SNACKBAR_DURATION } from '../../pages/login'
-import { disableBodyScroll } from 'body-scroll-lock'
+import { SNACKBAR_DURATION } from '../../consts'
 
 const useStyles = makeStyles(() => ({
     root: {

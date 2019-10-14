@@ -2,8 +2,7 @@
 import React from 'react'
 import { Box, Button, TextField } from '@material-ui/core'
 import * as yup from 'yup'
-import { SPACING_PADDING } from '../../consts'
-import { BACKGROUND_COLOR } from '../../pages/login'
+import { SPACING_PADDING, BACKGROUND_COLOR } from '../../consts'
 
 export const valuesRegisterForm = {
     userName: '',

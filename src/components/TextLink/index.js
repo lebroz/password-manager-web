@@ -1,7 +1,6 @@
 // @flow
 import React from 'react'
-import { SPACING_PADDING } from '../../consts'
-import { BACKGROUND_COLOR } from '../../pages/login'
+import { SPACING_PADDING, BACKGROUND_COLOR } from '../../consts'
 import { Link } from '@material-ui/core'
 
 const TextLink = ({

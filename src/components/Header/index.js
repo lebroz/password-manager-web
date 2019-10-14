@@ -13,8 +13,7 @@ import {
     Toolbar,
     Typography,
 } from '@material-ui/core'
-import { BACKGROUND_COLOR } from '../../pages/login'
-import { SPACING_PADDING } from '../../consts'
+import { SPACING_PADDING, BACKGROUND_COLOR } from '../../consts'
 
 const useStyles = makeStyles(theme => ({
     title: {

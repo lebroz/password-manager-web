@@ -1,22 +1,16 @@
 // @flow
 import React, { useState, useEffect, useCallback } from 'react'
-import { Box, Card, CardContent, Typography } from '@material-ui/core'
-import { SPACING_PADDING } from '../consts'
+import { Box } from '@material-ui/core'
 import Router from 'next/router'
-import { Formik } from 'formik'
-import FormRegister, {
-    validationSchemaRegisterForm,
-    valuesRegisterForm,
-} from '../components/Form/FormRegister'
 import { createUserPolicy, createUserSecret } from '../api/vault'
 import { createUser } from '../api/db'
-import * as V from 'voca'
-import { disableBodyScroll } from 'body-scroll-lock'
 import ShapeLoginRegister from '../components/Layout/shape'
 import SnackBar from '../components/SnackBar'
 import Layout from '../components/Layout'
 import Head from 'next/head'
-import { ERR_DEFAULT_MESSAGE, ERR_NETWORK_ERROR } from '../consts/strings'
+import { handleErrorAPI } from '../functions'
+import CardRegister from '../components/Card/CardRegister'
+import { disableBodyScroll } from 'body-scroll-lock'
 
 const axios = require('axios').default
 
@@ -28,35 +22,27 @@ const Register = () => {
         disableBodyScroll(document.querySelector('#body'))
     })
 
-    const handleError = useCallback(
-        error => {
-            {
-                console.log('err: ', error.response)
-                if (V.isEmpty(error.response) === false) {
-                    if (V.isEmpty(error.response.data.message) === false) {
-                        setMsg({
-                            content: error.response.data.message,
-                            err: true,
+    const onSubmit = useCallback((userName, email, password) => {
+        createUser(userName, email, password)
+            .then(() => {
+                axios
+                    .all([
+                        createUserSecret(userName),
+                        createUserPolicy(userName),
+                    ])
+                    .then(
+                        axios.spread((secret, policy) => {
+                            setMsg({
+                                content: 'Account has been created!',
+                                err: false,
+                            })
+                            setIsOpen(true)
+                            Router.push('/')
                         })
-                        setIsOpen(true)
-                    } else {
-                        setMsg({
-                            content: ERR_DEFAULT_MESSAGE,
-                            err: true,
-                        })
-                        setIsOpen(true)
-                    }
-                } else {
-                    setMsg({
-                        content: ERR_NETWORK_ERROR,
-                        err: true,
-                    })
-                    setIsOpen(true)
-                }
-            }
-        },
-        [setMsg, setIsOpen]
-    )
+                    )
+            })
+            .catch(error => handleErrorAPI(error, setMsg, setIsOpen))
+    })
 
     return (
         <Layout>
@@ -80,89 +66,7 @@ const Register = () => {
                     justifyContent: 'center',
                 }}
             >
-                <Card raised style={{ height: 800, width: 650 }}>
-                    <CardContent
-                        style={{
-                            height: '100%',
-                            padding: SPACING_PADDING * 8,
-                        }}
-                    >
-                        <Box
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                padding: SPACING_PADDING * 8,
-                            }}
-                        >
-                            <Box
-                                style={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                }}
-                            >
-                                <Typography
-                                    style={{
-                                        fontFamily: 'Nunito',
-                                        fontWeight: 400,
-                                        fontSize: 28,
-                                        letterSpacing: 2.5,
-                                        marginLeft: SPACING_PADDING * 2,
-                                    }}
-                                    variant="h4"
-                                >
-                                    Create an Account
-                                </Typography>
-                                <div
-                                    style={{
-                                        marginTop: SPACING_PADDING * 4,
-                                        borderStyle: 'solid',
-                                        borderWidth: '1px',
-                                        width: 100,
-                                    }}
-                                />
-                            </Box>
-                            <Formik
-                                render={props => <FormRegister {...props} />}
-                                initialValues={valuesRegisterForm}
-                                validationSchema={validationSchemaRegisterForm}
-                                onSubmit={({
-                                    userName,
-                                    email,
-                                    confirmPassword,
-                                    password,
-                                }) => {
-                                    // CREATE USER HERE
-                                    createUser(userName, email, password)
-                                        .then(() => {
-                                            // SETUP VAULT SECRET, POLICY, LEASE USER HERE
-                                            axios
-                                                .all([
-                                                    createUserSecret(userName),
-                                                    createUserPolicy(userName),
-                                                ])
-                                                .then(
-                                                    axios.spread(
-                                                        (secret, policy) => {
-                                                            setMsg({
-                                                                content:
-                                                                    'Account has been created!',
-                                                                err: false,
-                                                            })
-                                                            setIsOpen(true)
-                                                            Router.push('/')
-                                                        }
-                                                    )
-                                                )
-                                        })
-                                        .catch(error => handleError(error))
-                                    // END CREATE USER
-                                }}
-                            />
-                        </Box>
-                    </CardContent>
-                </Card>
+                <CardRegister onSubmit={onSubmit} />
             </Box>
             <Box
                 style={{

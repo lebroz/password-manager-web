@@ -1,5 +1,11 @@
 // @flow
-import React, { useContext, useEffect, useState, useCallback } from 'react'
+import React, {
+    useCallback,
+    useContext,
+    useEffect,
+    useState,
+    useLayoutEffect,
+} from 'react'
 import Layout from '../components/Layout'
 import UserContext from '../store/UserContext'
 import {
@@ -8,47 +14,33 @@ import {
     updateUserSecrets,
 } from '../api/vault'
 import { getUserData } from '../api/db'
-import {
-    Box,
-    Typography,
-    Card,
-    CardContent,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogContentText,
-    TextField,
-    Button,
-    DialogActions,
-    GridList,
-} from '@material-ui/core'
-import { SPACING_PADDING } from '../consts'
-import { makeStyles } from '@material-ui/core/styles'
-import Delete from '@material-ui/icons/DeleteOutlineRounded'
-import Edit from '@material-ui/icons/Edit'
-import Detail from '@material-ui/icons/Details'
+import { Box, CircularProgress, GridList } from '@material-ui/core'
+import { SPACING_PADDING, BACKGROUND_COLOR } from '../consts'
 import Head from 'next/head'
 import Header from '../components/Header'
 import FloatButton from '../components/FloatButton'
-import { BACKGROUND_COLOR } from './login'
 import * as R from 'ramda'
-
-const useStyles = makeStyles(theme => ({
-    root: {
-        flexGrow: 1,
-    },
-    menuButton: {
-        marginRight: theme.spacing(2),
-    },
-}))
+import CardSecret from '../components/Card/CardSecret'
+import DialogSecret from '../components/Dialog/DialogSecret'
+import DialogAdd from '../components/Dialog/DialogAdd'
 
 const Home = () => {
     const context = useContext(UserContext)
-    const classes = useStyles()
     const [newTitleSecret, setNewTitleSecret] = useState(null)
     const [newSecret, setNewSecret] = useState(null)
     const [secrets, setSecrets] = useState(null)
     const [isOpen, setIsOpen] = useState(false)
+    const [isCardOpen, setIsCardOpen] = useState(false)
+    const [card, setCard] = useState({ key: '', name: '' })
+    const [width, setWidth] = useState(0)
+
+    useLayoutEffect(() => {
+        function updateSize() {
+            setWidth(window.innerWidth)
+        }
+        window.addEventListener('resize', updateSize)
+        window.removeEventListener('resize', updateSize)
+    })
 
     useEffect(() => {
         const token = localStorage.getItem('token')
@@ -111,6 +103,14 @@ const Home = () => {
         }
     })
 
+    const handleDisplay = useCallback(event => {
+        setCard({
+            key: event.currentTarget.id,
+            value: event.currentTarget.name,
+        })
+        setIsCardOpen(true)
+    })
+
     return (
         <Layout>
             <Head>
@@ -131,7 +131,7 @@ const Home = () => {
                     <>
                         <GridList
                             cellHeight={220}
-                            cols={5}
+                            cols={Math.ceil(width / 250)}
                             style={{
                                 width: '100%',
                                 alignContent: 'flex-start',
@@ -146,105 +146,12 @@ const Home = () => {
                                         padding: SPACING_PADDING * 2,
                                     }}
                                 >
-                                    <Card
-                                        raised
-                                        style={{
-                                            height: 190,
-                                            width: 200,
-                                            borderRadius: 25,
-                                        }}
-                                    >
-                                        <CardContent>
-                                            <Box
-                                                style={{
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                }}
-                                            >
-                                                <Box
-                                                    style={{
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        alignItems: 'center',
-                                                        justifyContent:
-                                                            'center',
-                                                    }}
-                                                >
-                                                    <Detail />
-                                                    <Typography
-                                                        style={{
-                                                            marginTop: SPACING_PADDING,
-                                                            fontFamily:
-                                                                'Nunito',
-                                                            textTransform:
-                                                                'uppercase',
-                                                            letterSpacing: -0.25,
-                                                            fontWeight: 600,
-                                                            color: BACKGROUND_COLOR,
-                                                        }}
-                                                    >
-                                                        {key}
-                                                    </Typography>
-                                                    <div
-                                                        style={{
-                                                            marginTop: SPACING_PADDING,
-                                                            borderStyle:
-                                                                'solid',
-                                                            borderWidth: '1px',
-                                                            borderColor: BACKGROUND_COLOR,
-                                                            width: 150,
-                                                        }}
-                                                    />
-                                                    <Typography
-                                                        style={{
-                                                            marginTop:
-                                                                SPACING_PADDING *
-                                                                2,
-                                                            fontFamily:
-                                                                'Nunito',
-                                                            letterSpacing: -0.25,
-                                                            fontWeight: 600,
-                                                            color: '#999999',
-                                                        }}
-                                                    >
-                                                        Value: {secrets[key]}
-                                                    </Typography>
-                                                </Box>
-                                                <Box
-                                                    style={{
-                                                        display: 'flex',
-                                                        marginTop:
-                                                            SPACING_PADDING * 4,
-                                                        marginBottom:
-                                                            SPACING_PADDING * 2,
-                                                    }}
-                                                >
-                                                    <Delete
-                                                        id={key}
-                                                        style={{
-                                                            cursor: 'pointer',
-                                                            color: BACKGROUND_COLOR,
-                                                            marginRight:
-                                                                SPACING_PADDING *
-                                                                5,
-                                                        }}
-                                                        onClick={handleDelete}
-                                                    />
-                                                    <Edit
-                                                        style={{
-                                                            cursor: 'pointer',
-                                                            color: BACKGROUND_COLOR,
-                                                            marginLeft:
-                                                                SPACING_PADDING *
-                                                                5,
-                                                        }}
-                                                    />
-                                                </Box>
-                                            </Box>
-                                        </CardContent>
-                                    </Card>
+                                    <CardSecret
+                                        keyId={key}
+                                        secrets={secrets}
+                                        handleDisplay={handleDisplay}
+                                        handleDelete={handleDelete}
+                                    />
                                 </Box>
                             ))}
                         </GridList>
@@ -259,21 +166,9 @@ const Home = () => {
                                 justifyContent: 'center',
                             }}
                         >
-                            <Typography
-                                style={{
-                                    marginTop: SPACING_PADDING,
-                                    fontFamily: 'Nunito',
-                                    textTransform: 'uppercase',
-                                    letterSpacing: -0.25,
-                                    textAlign: 'center',
-                                    fontWeight: 400,
-                                    color: BACKGROUND_COLOR,
-                                }}
-                            >
-                                You don't have secrets for now
-                                <br />
-                                Add a secret to start
-                            </Typography>
+                            <CircularProgress
+                                style={{ color: BACKGROUND_COLOR }}
+                            />
                         </Box>
                     </Layout>
                 )}
@@ -283,79 +178,39 @@ const Home = () => {
                     setIsOpen(true)
                 }}
             />
-            <Dialog
-                open={isOpen}
+            <DialogAdd
+                isOpen={isOpen}
+                setNewTitleSecret={setNewTitleSecret}
+                setNewSecret={setNewSecret}
                 onClose={() => {
                     setIsOpen(false)
                 }}
-            >
-                <DialogTitle id="form-dialog-title">Secret</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Add a new secret in your vault
-                    </DialogContentText>
-                    <TextField
-                        margin="dense"
-                        id="name-secret"
-                        label="Name secret"
-                        fullWidth
-                        autoFocus
-                        autoComplete="off"
-                        onChange={e => {
-                            setNewTitleSecret(e.target.value)
-                        }}
-                    />
-                    <TextField
-                        margin="dense"
-                        id="value-secret"
-                        label="Value secret"
-                        fullWidth
-                        autoComplete="off"
-                        onChange={e => {
-                            setNewSecret(e.target.value)
-                        }}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button
-                        disableRipple
-                        onClick={() => {
-                            setIsOpen(false)
+                onSubmit={() => {
+                    setIsOpen(false)
+                    const vaultToken = localStorage.getItem('vault-token')
+                    if (newTitleSecret != null && vaultToken != null) {
+                        updateUserSecrets(
+                            context.userData.userName,
+                            vaultToken,
+                            { ...secrets, [newTitleSecret]: newSecret }
+                        ).then(res => {
+                            setSecrets({
+                                ...secrets,
+                                [newTitleSecret]: newSecret,
+                            })
                             setNewSecret(null)
                             setNewTitleSecret(null)
-                        }}
-                        color="primary"
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        disableRipple
-                        onClick={() => {
-                            setIsOpen(false)
-                            const vaultToken = localStorage.getItem(
-                                'vault-token'
-                            )
-                            if (newTitleSecret != null && vaultToken != null) {
-                                updateUserSecrets(
-                                    context.userData.userName,
-                                    vaultToken,
-                                    { ...secrets, [newTitleSecret]: newSecret }
-                                ).then(res => {
-                                    setSecrets({
-                                        ...secrets,
-                                        [newTitleSecret]: newSecret,
-                                    })
-                                    setNewSecret(null)
-                                    setNewTitleSecret(null)
-                                })
-                            }
-                        }}
-                        color="primary"
-                    >
-                        Create
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                        })
+                    }
+                }}
+            />
+            <DialogSecret
+                isCardOpen={isCardOpen}
+                onClose={() => {
+                    setIsCardOpen(false)
+                }}
+                card={card}
+            />
         </Layout>
     )
 }
