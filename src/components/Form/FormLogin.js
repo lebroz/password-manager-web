@@ -1,8 +1,9 @@
 // @flow
 import React from 'react'
-import { Box, Button, TextField } from '@material-ui/core'
 import * as yup from 'yup'
+import { Box, Button, TextField } from '@material-ui/core'
 import { SPACING_PADDING } from '../../consts'
+import { BACKGROUND_COLOR } from '../../pages/login'
 
 export const valuesLoginForm = {
     email: '',
@@ -52,7 +53,7 @@ const FormLogin = props => {
                     error={touched.email && Boolean(errors.email)}
                     type="email"
                     name="email"
-                    autoComplete="email"
+                    autoComplete="off"
                     margin="normal"
                     variant="outlined"
                     value={email}
@@ -65,7 +66,7 @@ const FormLogin = props => {
                     helperText={touched.password ? errors.password : ''}
                     error={touched.password && Boolean(errors.password)}
                     type="password"
-                    autoComplete="current-password"
+                    autoComplete="off"
                     margin="normal"
                     variant="outlined"
                     value={password}
@@ -75,9 +76,10 @@ const FormLogin = props => {
                     type="submit"
                     variant="contained"
                     style={{
+                        color: 'white',
                         marginTop: SPACING_PADDING * 5,
+                        backgroundColor: BACKGROUND_COLOR,
                     }}
-                    color="primary"
                     disabled={!isValid}
                 >
                     Login

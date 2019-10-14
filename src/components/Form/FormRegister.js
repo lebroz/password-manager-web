@@ -3,6 +3,7 @@ import React from 'react'
 import { Box, Button, TextField } from '@material-ui/core'
 import * as yup from 'yup'
 import { SPACING_PADDING } from '../../consts'
+import { BACKGROUND_COLOR } from '../../pages/login'
 
 export const valuesRegisterForm = {
     userName: '',
@@ -59,6 +60,7 @@ const FormRegister = props => {
                     helperText={touched.userName ? errors.userName : ''}
                     error={touched.userName && Boolean(errors.userName)}
                     name="userName"
+                    autoComplete="off"
                     margin="normal"
                     variant="outlined"
                     value={userName}
@@ -71,7 +73,7 @@ const FormRegister = props => {
                     error={touched.email && Boolean(errors.email)}
                     type="email"
                     name="email"
-                    autoComplete="email"
+                    autoComplete="off"
                     margin="normal"
                     variant="outlined"
                     value={email}
@@ -84,7 +86,7 @@ const FormRegister = props => {
                     helperText={touched.password ? errors.password : ''}
                     error={touched.password && Boolean(errors.password)}
                     type="password"
-                    autoComplete="current-password"
+                    autoComplete="off"
                     margin="normal"
                     variant="outlined"
                     value={password}
@@ -101,6 +103,7 @@ const FormRegister = props => {
                         Boolean(errors.confirmPassword)
                     }
                     name="confirmPassword"
+                    autoComplete="off"
                     type="password"
                     margin="normal"
                     variant="outlined"
@@ -111,7 +114,9 @@ const FormRegister = props => {
                     type="submit"
                     variant="contained"
                     style={{
+                        color: 'white',
                         marginTop: SPACING_PADDING * 5,
+                        backgroundColor: BACKGROUND_COLOR,
                     }}
                     color="primary"
                     disabled={!isValid}

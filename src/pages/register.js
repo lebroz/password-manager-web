@@ -1,50 +1,61 @@
 // @flow
-import React, { useContext, useState } from 'react'
-import { Box, Card, CardContent, Snackbar, Typography } from '@material-ui/core'
+import React, { useState, useEffect, useCallback } from 'react'
+import { Box, Card, CardContent, Typography } from '@material-ui/core'
 import { SPACING_PADDING } from '../consts'
-import Layout from '../components/Layout'
 import Router from 'next/router'
-import Head from 'next/head'
 import { Formik } from 'formik'
 import FormRegister, {
     validationSchemaRegisterForm,
     valuesRegisterForm,
 } from '../components/Form/FormRegister'
-import {
-    createUserPolicy,
-    createUserSecret,
-    createUserToken,
-} from '../api/vault'
+import { createUserPolicy, createUserSecret } from '../api/vault'
 import { createUser } from '../api/db'
-import UserContext from '../store/UserContext'
-import * as R from 'ramda'
-import { green, red } from '@material-ui/core/colors'
-import { makeStyles } from '@material-ui/styles'
-import { SNACKBAR_DURATION } from './login'
-import clsx from 'clsx'
 import * as V from 'voca'
+import { disableBodyScroll } from 'body-scroll-lock'
+import ShapeLoginRegister from '../components/Layout/shape'
+import SnackBar from '../components/SnackBar'
+import Layout from '../components/Layout'
+import Head from 'next/head'
 
 const axios = require('axios').default
 
-const useStyles = makeStyles(() => ({
-    root: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    success: {
-        backgroundColor: green[500],
-    },
-    failure: {
-        backgroundColor: red[500],
-    },
-}))
-
 const Register = () => {
-    const classes = useStyles()
-    const context = useContext(UserContext)
     const [msg, setMsg] = useState({ content: '', err: true })
     const [isOpen, setIsOpen] = useState(false)
+
+    useEffect(() => {
+        disableBodyScroll(document.querySelector('#body'))
+    })
+
+    const handleError = useCallback(
+        error => {
+            {
+                console.log('err: ', error.response)
+                if (V.isEmpty(error.response) === false) {
+                    if (V.isEmpty(error.response.data.message) === false) {
+                        setMsg({
+                            content: error.response.data.message,
+                            err: true,
+                        })
+                        setIsOpen(true)
+                    } else {
+                        setMsg({
+                            content: 'An error occured!',
+                            err: true,
+                        })
+                        setIsOpen(true)
+                    }
+                } else {
+                    setMsg({
+                        content: 'Network error',
+                        err: true,
+                    })
+                    setIsOpen(true)
+                }
+            }
+        },
+        [setMsg, setIsOpen]
+    )
 
     return (
         <Layout>
@@ -55,18 +66,23 @@ const Register = () => {
                     content="initial-scale=1.0, width=device-width"
                     key="register"
                 />
+                <link
+                    href="https://fonts.googleapis.com/css?family=Nunito"
+                    rel="stylesheet"
+                />
             </Head>
-            <Card raised style={{ height: 800, width: 650 }}>
-                <CardContent
-                    style={{
-                        height: '100%',
-                        padding: SPACING_PADDING * 8,
-                    }}
-                >
-                    <Box
+            <Box
+                style={{
+                    display: 'flex',
+                    flex: 0.75,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                }}
+            >
+                <Card raised style={{ height: 800, width: 650 }}>
+                    <CardContent
                         style={{
-                            display: 'flex',
-                            flexDirection: 'column',
+                            height: '100%',
                             padding: SPACING_PADDING * 8,
                         }}
                     >
@@ -74,120 +90,93 @@ const Register = () => {
                             style={{
                                 display: 'flex',
                                 flexDirection: 'column',
-                                alignItems: 'center',
-                                justifyContent: 'center',
+                                padding: SPACING_PADDING * 8,
                             }}
                         >
-                            <Typography
-                                style={{ marginLeft: SPACING_PADDING * 2 }}
-                                variant="h4"
-                            >
-                                Create an Account
-                            </Typography>
-                            <div
+                            <Box
                                 style={{
-                                    marginTop: SPACING_PADDING * 4,
-                                    borderStyle: 'solid',
-                                    borderWidth: '1px',
-                                    width: 100,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                <Typography
+                                    style={{
+                                        fontFamily: 'Nunito',
+                                        fontWeight: 400,
+                                        fontSize: 28,
+                                        letterSpacing: 2.5,
+                                        marginLeft: SPACING_PADDING * 2,
+                                    }}
+                                    variant="h4"
+                                >
+                                    Create an Account
+                                </Typography>
+                                <div
+                                    style={{
+                                        marginTop: SPACING_PADDING * 4,
+                                        borderStyle: 'solid',
+                                        borderWidth: '1px',
+                                        width: 100,
+                                    }}
+                                />
+                            </Box>
+                            <Formik
+                                render={props => <FormRegister {...props} />}
+                                initialValues={valuesRegisterForm}
+                                validationSchema={validationSchemaRegisterForm}
+                                onSubmit={({
+                                    userName,
+                                    email,
+                                    confirmPassword,
+                                    password,
+                                }) => {
+                                    // CREATE USER HERE
+                                    createUser(userName, email, password, '')
+                                        .then(() => {
+                                            // SETUP VAULT SECRET, POLICY, LEASE USER HERE
+                                            axios
+                                                .all([
+                                                    createUserSecret(userName),
+                                                    createUserPolicy(userName),
+                                                ])
+                                                .then(
+                                                    axios.spread(
+                                                        (secret, policy) => {
+                                                            setMsg({
+                                                                content:
+                                                                    'Account has been created!',
+                                                                err: false,
+                                                            })
+                                                            setIsOpen(true)
+                                                            Router.push('/')
+                                                        }
+                                                    )
+                                                )
+                                        })
+                                        .catch(error => handleError(error))
+                                    // END CREATE USER
                                 }}
                             />
                         </Box>
-                        <Formik
-                            render={props => <FormRegister {...props} />}
-                            initialValues={valuesRegisterForm}
-                            validationSchema={validationSchemaRegisterForm}
-                            onSubmit={({
-                                userName,
-                                email,
-                                confirmPassword,
-                                password,
-                            }) => {
-                                // CREATE USER HERE
-                                createUser(userName, email, password, '')
-                                    .then(() => {
-                                        // SETUP VAULT SECRET, POLICY, LEASE USER HERE
-                                        axios
-                                            .all([
-                                                createUserSecret(userName),
-                                                createUserPolicy(userName),
-                                                createUserToken(userName),
-                                            ])
-                                            .then(
-                                                axios.spread(
-                                                    (secret, policy, token) => {
-                                                        console.log(
-                                                            'token : ',
-                                                            token
-                                                        )
-                                                        context.setUserData(
-                                                            R.merge(
-                                                                context.userData,
-                                                                {
-                                                                    vaultToken:
-                                                                        token
-                                                                            .data
-                                                                            .auth
-                                                                            .client_token,
-                                                                }
-                                                            )
-                                                        )
-                                                        setMsg({
-                                                            content:
-                                                                'Account has been created!',
-                                                            err: false,
-                                                        })
-                                                        setIsOpen(true)
-                                                        Router.push('/')
-                                                    }
-                                                )
-                                            )
-                                    })
-                                    .catch(error => {
-                                        if (
-                                            V.isEmpty(
-                                                error.response.data.message
-                                            ) === false
-                                        ) {
-                                            setMsg({
-                                                content:
-                                                    error.response.data.message,
-                                                err: true,
-                                            })
-                                            setIsOpen(true)
-                                        } else {
-                                            setMsg({
-                                                content: 'An error occured!',
-                                                err: true,
-                                            })
-                                            setIsOpen(true)
-                                        }
-                                    })
-                                // END CREATE USER
-                            }}
-                        />
-                    </Box>
-                </CardContent>
-            </Card>
-            <Snackbar
-                anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'center',
+                    </CardContent>
+                </Card>
+            </Box>
+            <Box
+                style={{
+                    position: 'fixed',
                 }}
-                open={isOpen}
-                autoHideDuration={SNACKBAR_DURATION}
-                onClose={() => {
-                    setIsOpen(false)
-                }}
-                ContentProps={{
-                    classes: {
-                        root: msg.err
-                            ? clsx(classes.root, classes.failure)
-                            : clsx(classes.root, classes.success),
-                    },
-                }}
-                message={<span id="message-register">{msg.content}</span>}
-            />
+            >
+                <SnackBar
+                    open={isOpen}
+                    msg={msg}
+                    onClose={() => {
+                        setIsOpen(false)
+                    }}
+                />
+            </Box>
+            <ShapeLoginRegister />
         </Layout>
     )
 }

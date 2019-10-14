@@ -55,20 +55,23 @@ export function createUserToken(userName: string) {
         url: BASE_URL + 'auth/token/create',
         data: {
             policies: ['default', `${userName}`],
-            display_name: `${userName}_token`,
         },
     })
 }
 
-export function revokeUserToken(userName: string) {
+export function revokeUserToken(token: string) {
     return axios({
         method: 'post',
+        mode: 'no-cors',
+        httpsAgent: agent,
         headers: {
             Authorization: 'Bearer ' + VAULT_API_TOKEN,
+            'Access-Control-Allow-Origin': '*',
+            'Content-Type': 'application/json',
         },
         url: BASE_URL + 'auth/token/revoke',
         data: {
-            token: 'TOKEN_ICI',
+            token: token,
         },
     })
 }
@@ -84,5 +87,24 @@ export function getUserSecrets(userName: string, token: string) {
             'Content-Type': 'application/json',
         },
         url: BASE_URL + 'secret/' + userName,
+    })
+}
+
+export function updateUserSecrets(
+    userName: string,
+    token: string,
+    data: Object
+) {
+    return axios({
+        method: 'post',
+        mode: 'no-cors',
+        httpsAgent: agent,
+        headers: {
+            Authorization: 'Bearer ' + token,
+            'Access-Control-Allow-Origin': '*',
+            'Content-Type': 'application/json',
+        },
+        url: BASE_URL + 'secret/' + userName,
+        data: data,
     })
 }
