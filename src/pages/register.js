@@ -67,19 +67,19 @@ const Register = () => {
                 }}
             >
                 <CardRegister onSubmit={onSubmit} />
-            </Box>
-            <Box
-                style={{
-                    position: 'fixed',
-                }}
-            >
-                <SnackBar
-                    open={isOpen}
-                    msg={msg}
-                    onClose={() => {
-                        setIsOpen(false)
+                <Box
+                    style={{
+                        position: 'fixed',
                     }}
-                />
+                >
+                    <SnackBar
+                        open={isOpen}
+                        msg={msg}
+                        onClose={() => {
+                            setIsOpen(false)
+                        }}
+                    />
+                </Box>
             </Box>
             <ShapeLoginRegister />
         </Layout>

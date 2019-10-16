@@ -1,6 +1,11 @@
 // @flow
 import React from 'react'
-import { DialogContent, DialogTitle } from '@material-ui/core'
+import {
+    Button,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+} from '@material-ui/core'
 import { TextCardSubtitle, TextCardTitle, TextInline } from '../Typography'
 import { BACKGROUND_COLOR, SPACING_PADDING } from '../../consts'
 import { StyledDialog } from './index'
@@ -51,6 +56,19 @@ const DialogSecret = ({
                     </TextInline>
                 </TextCardSubtitle>
             </DialogContent>
+            <DialogActions>
+                <Button
+                    disableRipple
+                    onClick={onClose}
+                    color="primary"
+                    style={{
+                        color: BACKGROUND_COLOR,
+                        marginRight: SPACING_PADDING,
+                    }}
+                >
+                    Close
+                </Button>
+            </DialogActions>
         </StyledDialog>
     )
 }

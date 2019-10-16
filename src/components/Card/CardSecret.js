@@ -19,11 +19,13 @@ const CardSecret = ({
     secrets,
     handleDisplay,
     handleDelete,
+    handleEdit,
 }: {
     keyId: string,
     secrets: Object,
     handleDisplay: () => void,
     handleDelete: () => void,
+    handleEdit: () => void,
 }) => {
     return (
         <Card
@@ -126,10 +128,13 @@ const CardSecret = ({
                         }}
                     >
                         <Edit
+                            id={keyId}
+                            name={secrets[keyId]}
                             style={{
                                 cursor: 'pointer',
                                 color: BACKGROUND_COLOR,
                             }}
+                            onClick={event => handleEdit(event)}
                         />
                     </Box>
                 </Box>

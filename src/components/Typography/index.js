@@ -32,7 +32,7 @@ export const TextCardSubtitle = ({
     style,
 }: {
     children: Node,
-    style: Object,
+    style?: Object,
 }) => {
     return (
         <Typography

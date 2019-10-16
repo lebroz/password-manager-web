@@ -23,9 +23,14 @@ import * as R from 'ramda'
 import CardSecret from '../components/Card/CardSecret'
 import DialogSecret from '../components/Dialog/DialogSecret'
 import DialogAdd from '../components/Dialog/DialogAdd'
+import DialogEdit from '../components/Dialog/DialogEdit'
+import DialogAlert from '../components/Dialog'
 
 const Home = () => {
     const context = useContext(UserContext)
+    const [isAlertOpen, setIsAlertOpen] = useState(null)
+    const [isEditOpen, setIsEditOpen] = useState(null)
+    const [newEditSecret, setEditSecret] = useState(null)
     const [newTitleSecret, setNewTitleSecret] = useState(null)
     const [newSecret, setNewSecret] = useState(null)
     const [secrets, setSecrets] = useState(null)
@@ -111,6 +116,17 @@ const Home = () => {
         setIsCardOpen(true)
     })
 
+    const handleEdit = useCallback(
+        event => {
+            setCard({
+                key: event.currentTarget.id,
+                value: event.currentTarget.name,
+            })
+            setIsEditOpen(true)
+        },
+        [setIsEditOpen]
+    )
+
     return (
         <Layout>
             <Head>
@@ -151,6 +167,7 @@ const Home = () => {
                                         secrets={secrets}
                                         handleDisplay={handleDisplay}
                                         handleDelete={handleDelete}
+                                        handleEdit={handleEdit}
                                     />
                                 </Box>
                             ))}
@@ -189,18 +206,31 @@ const Home = () => {
                     setIsOpen(false)
                     const vaultToken = localStorage.getItem('vault-token')
                     if (newTitleSecret != null && vaultToken != null) {
-                        updateUserSecrets(
-                            context.userData.userName,
-                            vaultToken,
-                            { ...secrets, [newTitleSecret]: newSecret }
-                        ).then(res => {
-                            setSecrets({
-                                ...secrets,
-                                [newTitleSecret]: newSecret,
+                        getUserSecrets(context.userData.userName, vaultToken)
+                            .then(res => {
+                                const data = res.data.data
+                                if (
+                                    data.hasOwnProperty(newTitleSecret) ===
+                                    false
+                                ) {
+                                    updateUserSecrets(
+                                        context.userData.userName,
+                                        vaultToken,
+                                        {
+                                            ...secrets,
+                                            [newTitleSecret]: newSecret,
+                                        }
+                                    ).then(res => {
+                                        setSecrets({
+                                            ...secrets,
+                                            [newTitleSecret]: newSecret,
+                                        })
+                                    })
+                                } else {
+                                    setIsAlertOpen(true)
+                                }
                             })
-                            setNewSecret(null)
-                            setNewTitleSecret(null)
-                        })
+                            .catch(error => console.log(error))
                     }
                 }}
             />
@@ -210,6 +240,43 @@ const Home = () => {
                     setIsCardOpen(false)
                 }}
                 card={card}
+            />
+            <DialogEdit
+                isOpen={isEditOpen}
+                card={card}
+                setEditSecret={setEditSecret}
+                onClose={() => setIsEditOpen(false)}
+                onSubmit={() => {
+                    setIsEditOpen(false)
+                    const vaultToken = localStorage.getItem('vault-token')
+                    if (newEditSecret != null && vaultToken != null) {
+                        getUserSecrets(context.userData.userName, vaultToken)
+                            .then(res => {
+                                const data = res.data.data
+                                if (data.hasOwnProperty(card.key)) {
+                                    updateUserSecrets(
+                                        context.userData.userName,
+                                        vaultToken,
+                                        {
+                                            ...secrets,
+                                            [card.key]: newEditSecret,
+                                        }
+                                    ).then(res => {
+                                        setSecrets({
+                                            ...secrets,
+                                            [card.key]: newEditSecret,
+                                        })
+                                    })
+                                }
+                            })
+                            .catch(error => console.log(error))
+                    }
+                }}
+            />
+            <DialogAlert
+                isAlertOpen={isAlertOpen}
+                onClose={() => setIsAlertOpen(false)}
+                text={newTitleSecret}
             />
         </Layout>
     )

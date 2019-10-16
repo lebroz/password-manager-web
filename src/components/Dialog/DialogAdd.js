@@ -9,6 +9,7 @@ import {
     Button,
 } from '@material-ui/core'
 import { StyledDialog } from './index'
+import { BACKGROUND_COLOR, SPACING_PADDING } from '../../consts'
 
 const DialogAdd = ({
     isOpen,
@@ -53,10 +54,26 @@ const DialogAdd = ({
                 />
             </DialogContent>
             <DialogActions>
-                <Button disableRipple onClick={onClose} color="primary">
+                <Button
+                    disableRipple
+                    onClick={onClose}
+                    color="primary"
+                    style={{
+                        color: BACKGROUND_COLOR,
+                        marginRight: SPACING_PADDING,
+                    }}
+                >
                     Cancel
                 </Button>
-                <Button disableRipple onClick={onSubmit} color="primary">
+                <Button
+                    disableRipple
+                    onClick={onSubmit}
+                    color="primary"
+                    style={{
+                        color: BACKGROUND_COLOR,
+                        marginRight: SPACING_PADDING,
+                    }}
+                >
                     Create
                 </Button>
             </DialogActions>
