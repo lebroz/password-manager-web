@@ -11,7 +11,7 @@
     "build": "next build",
     "start": "next start",
     "build-start-app": "yarn build && yarn start",
-    "run-docker": "sudo rm -rf data/ ; cd api/ ; yarn && yarn generate-keys && yarn generate-env ; cd ../ ; docker-compose build && docker-compose up",
+    "run-docker": "sudo rm -rf data/ ; cd api/ ; sudo rm -rf data/ ; yarn && yarn generate-keys && yarn generate-env ; cd ../ ; docker-compose build && docker-compose up",
     "prettier": "prettier --write \"src/**/*.js\""
   },
   "dependencies": {
